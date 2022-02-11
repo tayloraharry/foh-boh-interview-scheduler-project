@@ -1,0 +1,11 @@
+.interviews__modal {
+  position: 'absolute';
+  top: '50%';
+  left: '50%';
+  transform: 'translate(-50%, -50%)';
+  width: 400;
+  background-color: 'background.paper';
+  border: none;
+  box-shadow: 24;
+  padding: 4;
+};

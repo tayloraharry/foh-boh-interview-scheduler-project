@@ -1,0 +1,23 @@
+
+html {
+  overflow: scroll;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar {
+  width: 0;
+}
+
+
+.container {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  align-content: start
+}
+
+.item {
+  flex: 1 0 auto;
+  margin: 10px;
+}

@@ -1,0 +1,34 @@
+[
+  {
+    "model": "interviewscheduler.candidate",
+    "pk": 1,
+    "fields": {
+      "name": "Taylor Harry",
+      "email": "tharry@gmail.com"
+    }
+  },
+  {
+    "model": "interviewscheduler.candidate",
+    "pk": 2,
+    "fields": {
+      "name": "Cristen Harry",
+      "email": "charry@gmail.com"
+    }
+  },
+  {
+    "model": "interviewscheduler.candidate",
+    "pk": 3,
+    "fields": {
+      "name": "Hudson Harry",
+      "email": "hharry@gmail.com"
+    }
+  },
+  {
+    "model": "interviewscheduler.candidate",
+    "pk": 4,
+    "fields": {
+      "name": "Mark Harry",
+      "email": "mharry@gmail.com"
+    }
+  }
+]
