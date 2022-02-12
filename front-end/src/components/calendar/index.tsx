@@ -75,7 +75,8 @@ const Calendar = () => {
             selecteddays: (Date | null)[],
             dayProps: PickersDayProps<Date>
           ) => {
-            if (interviewDates.includes(convertToSimpleDate(day))) {
+            const convertedDay = convertToSimpleDate(day);
+            if (convertedDay !== convertToSimpleDate(selectedDate) && day >= today && interviewDates.includes(convertedDay)) {
               return (
                 <PickersDay
                   {...dayProps}

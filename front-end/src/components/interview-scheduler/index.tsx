@@ -61,9 +61,18 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
   const [alertSeverity, setAlertSeverity] = useState<"error" | "success">();
   const [alertMessage, setAlertMessage] = useState<string>();
 
+  const resetForm = () => {
+    setForm({
+      candidate_id: 0,
+      location_name: "",
+      scheduled_time: defaultDate,
+    })
+  };
+
   const handleScheduleInterview = () => {
     scheduleInterview()
       .then(() => {
+        resetForm();
         setAlertMessage("Interview scheduled successfully");
         setAlertSeverity("success");
         setShowNotification(true);
@@ -85,7 +94,7 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
       <Tooltip title="Scehdule Interview">
         <Box
           style={{ cursor: "pointer", marginLeft: 10, color: "green" }}
-          onClick={() => setSchedulingInterview(true)}
+          onClick={() => (resetForm(), setSchedulingInterview(true))}
         >
           <MdOutlineEditCalendar size={20} />
         </Box>
