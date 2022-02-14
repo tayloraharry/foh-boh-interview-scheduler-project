@@ -20,7 +20,7 @@ class CandidateType(DjangoObjectType):
 
 class InterviewInput(graphene.InputObjectType):
     id = graphene.ID()
-    scheduled_time = graphene.Date()
+    scheduled_time = graphene.DateTime()
     location_name = graphene.String(required=True)
     candidate_id = graphene.String(required=True, name="candidate")
 
