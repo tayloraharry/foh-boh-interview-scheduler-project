@@ -14,19 +14,6 @@ class AddInterview(graphene.Mutation):
         _interview = Interview.objects.create(**input)
         return AddInterview(interview=_interview)
 
-class AddCandidate(graphene.Mutation):
-    class Arguments:
-        input = CandidateInput(required=True)
-
-    candidate = graphene.Field(CandidateType)
-
-    def mutate(parent, info, input=None):
-        if input is None:
-            return AddCandidate(author=None)
-        _candidate = Candidate.objects.create(**input)
-        return AddCandidate(candidate=_candidate)
-
-
 class CancelInterview(graphene.Mutation):
     ok = graphene.Boolean()
 
@@ -38,9 +25,24 @@ class CancelInterview(graphene.Mutation):
         print(kwargs)
         obj = Interview.objects.get(pk=kwargs["interview_id"])
         obj.delete()
-        return cls(ok=True)          
+        return cls(ok=True)
+
+class UpdateInterview(graphene.Mutation):
+    class Arguments:
+        interview_id = graphene.ID()
+        scheduled_time = graphene.DateTime()
+        location_name = graphene.String(required=True)
+        
+    interview = graphene.Field(InterviewType)
+    
+    def mutate(self, info, interview_id, scheduled_time, location_name):
+        interview = Interview.objects.get(pk=interview_id)
+        interview.scheduled_time = scheduled_time
+        interview.location_name = location_name
+        interview.save()
+        return UpdateInterview(interview=interview)
 
 class Mutation(graphene.ObjectType):
-    add_interview = AddInterview.Field()
-    add_candidate = AddCandidate.Field()        
+    add_interview = AddInterview.Field()     
     cancel_interview = CancelInterview.Field()
+    update_interview = UpdateInterview.Field()

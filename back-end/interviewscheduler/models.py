@@ -6,6 +6,6 @@ class Candidate(models.Model):
     email = models.CharField(max_length=100)
 
 class Interview(models.Model):
-    scheduled_time = models.DateField()
+    scheduled_time = models.DateTimeField()
     location_name = models.CharField(max_length=100)
     candidate = models.ForeignKey(Candidate, on_delete=models.CASCADE)
