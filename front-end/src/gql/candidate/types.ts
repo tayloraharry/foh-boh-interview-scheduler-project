@@ -2,7 +2,7 @@ import { IGqlResult } from "../types";
 
 // main object types
 export interface ICandidate {
-  id: number;
+  id: string;
   name: string;
   email: string;
 }

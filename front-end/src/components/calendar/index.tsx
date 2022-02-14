@@ -10,7 +10,6 @@ import { useQuery } from "@apollo/react-hooks";
 import { QUERY_INTERVIEWS } from "../../gql/interview/queries";
 import { PickersDayProps } from "@mui/lab";
 import { IInterviewResult } from "../../gql/interview/types";
-import { convertToSimpleDate } from "../../date-converter";
 import Interviews from "../interviews";
 
 const today = new Date();
@@ -27,7 +26,7 @@ const Calendar = () => {
     if (!data) return;
     if (data.interviews) {
       setInterviewDates(
-        data.interviews.map((i) => convertToSimpleDate(i.scheduledTime))
+        data.interviews.map((i) => new Date(i.scheduledTime).toISOString().split('T')[0])
       );
     }
   }, [data]);
@@ -75,8 +74,7 @@ const Calendar = () => {
             selecteddays: (Date | null)[],
             dayProps: PickersDayProps<Date>
           ) => {
-            const convertedDay = convertToSimpleDate(day);
-            if (convertedDay !== convertToSimpleDate(selectedDate) && day >= today && interviewDates.includes(convertedDay)) {
+            if (interviewDates.includes(new Date(day).toISOString().split('T')[0])) {
               return (
                 <PickersDay
                   {...dayProps}
