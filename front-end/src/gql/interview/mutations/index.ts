@@ -12,6 +12,24 @@ export const SCHEDULE_INTERVIEW = gql`
   }
 `;
 
+export const UPDATE_INTERVIEW = gql`
+  mutation updateInterview(
+    $id: ID
+    $locationName: String!
+    $scheduledTime: DateTime!
+  ) {
+    updateInterview(
+      interviewId: $id
+      locationName: $locationName
+      scheduledTime: $scheduledTime
+    ) {
+      interview {
+        id
+      }
+    }
+  }
+`;
+
 export const CANCEL_INTERVIEW = gql`
   mutation ($id: ID) {
     cancelInterview(interviewId: $id) {

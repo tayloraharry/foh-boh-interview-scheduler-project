@@ -3,8 +3,8 @@ import { IGqlResult } from "../types";
 
 // main object types
 export interface IInterview {
-  id: number;
-  scheduledTime: string;
+  id: string;
+  scheduledTime: Date;
   locationName: string;
   candidate: ICandidate;
 }

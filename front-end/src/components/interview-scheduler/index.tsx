@@ -10,32 +10,46 @@ import {
   InputLabel,
   MenuItem,
   Select,
-  Snackbar,
-  Alert,
+  AlertColor,
 } from "@mui/material";
-import { useState } from "react";
-import { MdOutlineEditCalendar } from "react-icons/md";
+import { useEffect, useState } from "react";
+import { BsCalendarPlus } from "react-icons/bs";
 import { ModalStyling } from "../../styles/modal";
 import LocalizationProvider from "@mui/lab/LocalizationProvider";
+import TimePicker from "@mui/lab/TimePicker";
 import AdapterDateFns from "@mui/lab/AdapterDateFns";
 import DesktopDatePicker from "@mui/lab/DesktopDatePicker";
 import { useMutation, useQuery } from "@apollo/react-hooks";
 import { QUERY_CANDIDATES } from "../../gql/candidate/queries";
 import { ICandidateResult } from "../../gql/candidate/types";
-import { SCHEDULE_INTERVIEW } from "../../gql/interview/mutations";
+import {
+  SCHEDULE_INTERVIEW,
+  UPDATE_INTERVIEW,
+} from "../../gql/interview/mutations";
 import { convertToSimpleDate } from "../../date-converter";
+import AlertBar from "../alert-bar";
+import { DateTimePicker } from "@mui/lab";
+import { IInterview } from "../../gql/interview/types";
 
 interface IInterviewSchedulerProps {
   defaultDate: Date;
+  editingInterview: boolean;
+  selectedInterview?: IInterview;
+  onDismiss(): void;
 }
 
 interface IInterviewForm {
-  candidate_id: number;
+  candidate_id: string;
   location_name: string;
   scheduled_time: Date;
 }
 
-const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
+const InterviewScheduler = ({
+  defaultDate,
+  selectedInterview,
+  editingInterview,
+  onDismiss,
+}: IInterviewSchedulerProps) => {
   const { data } = useQuery<ICandidateResult>(QUERY_CANDIDATES, {
     pollInterval: 500,
   });
@@ -43,7 +57,7 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
   const [schedulingInterview, setSchedulingInterview] =
     useState<boolean>(false);
   const [form, setForm] = useState<IInterviewForm>({
-    candidate_id: 0,
+    candidate_id: "",
     location_name: "",
     scheduled_time: defaultDate,
   });
@@ -52,27 +66,28 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
     variables: {
       input: {
         candidate: form.candidate_id,
-        scheduledTime: convertToSimpleDate(form.scheduled_time),
+        scheduledTime: form.scheduled_time,
         locationName: form.location_name,
       },
     },
   });
-  const [showNotification, setShowNotification] = useState<boolean>(false);
-  const [alertSeverity, setAlertSeverity] = useState<"error" | "success">();
-  const [alertMessage, setAlertMessage] = useState<string>();
 
-  const resetForm = () => {
-    setForm({
-      candidate_id: 0,
-      location_name: "",
-      scheduled_time: defaultDate,
-    })
-  };
+  const [updateInterview] = useMutation(UPDATE_INTERVIEW, {
+    variables: {
+      id: selectedInterview?.id,
+      scheduledTime: form.scheduled_time,
+      locationName: form.location_name,
+    },
+  });
+
+  const [showNotification, setShowNotification] = useState<boolean>(false);
+  const [alertSeverity, setAlertSeverity] = useState<AlertColor>("success");
+  const [alertMessage, setAlertMessage] = useState<string>("");
+  const [candidateName, setCandidateName] = useState<string>("");
 
   const handleScheduleInterview = () => {
     scheduleInterview()
       .then(() => {
-        resetForm();
         setAlertMessage("Interview scheduled successfully");
         setAlertSeverity("success");
         setShowNotification(true);
@@ -87,27 +102,60 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
       });
   };
 
+  const handleUpdateInterview = () => {
+    updateInterview()
+      .then(() => {
+        setAlertMessage("Interview updated successfully");
+        setAlertSeverity("success");
+        setShowNotification(true);
+        setSchedulingInterview(false);
+        onDismiss();
+      })
+      .catch((err) => {
+        console.log(err);
+        setAlertMessage("An error occured while updating interview");
+        setAlertSeverity("error");
+        setShowNotification(true);
+        setSchedulingInterview(false);
+        onDismiss();
+      });
+  };
+
+  useEffect(() => {
+    if (editingInterview && selectedInterview) {
+      const { candidate, scheduledTime, locationName } = selectedInterview;
+      setForm({
+        candidate_id: candidate.id,
+        scheduled_time: scheduledTime,
+        location_name: locationName,
+      });
+    }
+  }, [editingInterview]);
+
   if (!data?.candidates) return null;
+
+  console.log(data.candidates.filter((x) => x.id === "1"));
 
   return (
     <>
-      <Tooltip title="Scehdule Interview">
+      <Tooltip title="Schedule Interview">
         <Box
           style={{ cursor: "pointer", marginLeft: 10, color: "green" }}
-          onClick={() => (resetForm(), setSchedulingInterview(true))}
+          onClick={() => setSchedulingInterview(true)}
         >
-          <MdOutlineEditCalendar size={20} />
+          <BsCalendarPlus size={20} />
         </Box>
       </Tooltip>
       <Modal
-        open={schedulingInterview}
+        open={schedulingInterview || editingInterview}
         onClose={() => {
           setSchedulingInterview(false);
           setForm({
-            candidate_id: 0,
+            candidate_id: "",
             location_name: "",
             scheduled_time: defaultDate,
           });
+          onDismiss();
         }}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
@@ -130,31 +178,49 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
             autoComplete="off"
           >
             <FormControl fullWidth>
-              <InputLabel id="demo-simple-select-label">Candidate</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={form.candidate_id}
-                label="Candidate"
-                onChange={(e) => {
-                  const id = parseInt(e.target.value.toString());
-                  setForm({ ...form, candidate_id: id });
-                }}
-              >
-                {data.candidates.map((candidate) => {
-                  return (
-                    <MenuItem value={candidate.id}>{candidate.name}</MenuItem>
-                  );
-                })}
-              </Select>
+              {editingInterview ? (
+                <TextField
+                  disabled
+                  label="Candidate"
+                  defaultValue={
+                    data.candidates.filter(
+                      (c) => c.id === selectedInterview?.candidate.id
+                    )[0].name
+                  }
+                />
+              ) : (
+                <>
+                  <InputLabel id="candidate-select-label">Candidate</InputLabel>
+                  <Select
+                    labelId="candidate-select-label"
+                    id="candidate-select"
+                    value={form.candidate_id}
+                    label="Candidate"
+                    onChange={(e) => {
+                      setForm({ ...form, candidate_id: e.target.value });
+                    }}
+                  >
+                    {data.candidates.map((candidate) => {
+                      return (
+                        <MenuItem key={candidate.id} value={candidate.id}>
+                          {candidate.name}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                </>
+              )}
             </FormControl>
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <DesktopDatePicker
-                label="Date"
-                inputFormat="MM/dd/yyyy"
+              <DateTimePicker
+                renderInput={(props) => <TextField {...props} />}
+                label="DateTimePicker"
                 value={form.scheduled_time}
-                onChange={(e) => setForm({ ...form, scheduled_time: e! })}
-                renderInput={(params) => <TextField {...params} />}
+                minDate={new Date()}
+                onChange={(newValue) => {
+                  newValue && setForm({ ...form, scheduled_time: newValue });
+                }}
+                minutesStep={15}
               />
             </LocalizationProvider>
             <TextField
@@ -172,26 +238,29 @@ const InterviewScheduler = ({ defaultDate }: IInterviewSchedulerProps) => {
             <Button
               variant="contained"
               color="success"
-              onClick={handleScheduleInterview}
+              onClick={
+                editingInterview
+                  ? handleUpdateInterview
+                  : handleScheduleInterview
+              }
             >
               Schedule
             </Button>
             <Button
               variant="outlined"
-              onClick={() => setSchedulingInterview(false)}
+              onClick={() => (onDismiss(), setSchedulingInterview(false))}
             >
               Cancel
             </Button>
           </Stack>
         </Box>
       </Modal>
-      <Snackbar
-        open={showNotification}
-        autoHideDuration={6000}
-        onClose={() => setShowNotification(false)}
-      >
-        <Alert severity={alertSeverity}>{alertMessage}</Alert>
-      </Snackbar>
+      <AlertBar
+        show={showNotification}
+        severity={alertSeverity}
+        message={alertMessage}
+        onDismiss={() => setShowNotification(false)}
+      />
     </>
   );
 };
