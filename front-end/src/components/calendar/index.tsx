@@ -57,7 +57,7 @@ const Calendar = () => {
       }}
     >
       <h2>Interview Schedule</h2>
-      <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <LocalizationProvider dateAdapter={AdapterDateFns} style={{marginBottom: 20}}>
         <StaticDatePicker
           displayStaticWrapperAs="desktop"
           openTo="day"
