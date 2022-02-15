@@ -88,6 +88,11 @@ const InterviewScheduler = ({
   const handleScheduleInterview = () => {
     scheduleInterview()
       .then(() => {
+        setForm({
+          candidate_id: "",
+          location_name: "",
+          scheduled_time: defaultDate,
+        });
         setAlertMessage("Interview scheduled successfully");
         setAlertSeverity("success");
         setShowNotification(true);
@@ -105,6 +110,11 @@ const InterviewScheduler = ({
   const handleUpdateInterview = () => {
     updateInterview()
       .then(() => {
+        setForm({
+          candidate_id: "",
+          location_name: "",
+          scheduled_time: defaultDate,
+        });
         setAlertMessage("Interview updated successfully");
         setAlertSeverity("success");
         setShowNotification(true);
