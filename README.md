@@ -17,7 +17,7 @@
 - Directory: front-end
 
 ### Set Up
-- `cd front-end/app`
+- `cd front-end`
 - `npm install`
 - `npm start`
 - Visit [http://localhost:3000](http://localhost:3000)
