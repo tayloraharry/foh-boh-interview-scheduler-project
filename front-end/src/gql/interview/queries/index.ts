@@ -7,6 +7,7 @@ export const QUERY_INTERVIEWS = gql`
       scheduledTime
       locationName
       candidate {
+        id
         name
         email
       }

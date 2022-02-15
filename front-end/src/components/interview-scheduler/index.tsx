@@ -132,9 +132,11 @@ const InterviewScheduler = ({
     }
   }, [editingInterview]);
 
-  if (!data?.candidates) return null;
+  useEffect(() => {
+    setForm({...form, scheduled_time: defaultDate})
+  }, [defaultDate])
 
-  console.log(data.candidates.filter((x) => x.id === "1"));
+  if (!data?.candidates) return null;
 
   return (
     <>
@@ -185,7 +187,7 @@ const InterviewScheduler = ({
                   defaultValue={
                     data.candidates.filter(
                       (c) => c.id === selectedInterview?.candidate.id
-                    )[0].name
+                    )[0]?.name
                   }
                 />
               ) : (
@@ -237,14 +239,15 @@ const InterviewScheduler = ({
           <Stack direction="row" spacing={2} style={{ marginTop: 50 }}>
             <Button
               variant="contained"
-              color="success"
+              color={editingInterview ? 'primary' : 'success'}
+              disabled={!form.candidate_id || !form.scheduled_time || !form.location_name}
               onClick={
                 editingInterview
                   ? handleUpdateInterview
                   : handleScheduleInterview
               }
             >
-              Schedule
+             { editingInterview ? 'Update' : 'Schedule' }
             </Button>
             <Button
               variant="outlined"
